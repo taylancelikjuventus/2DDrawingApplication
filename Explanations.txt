@@ -1,0 +1,59 @@
+2D Drawing Application With JS
+
+
+This is a simple drawing application providing most basic features mentioned below.
+
+1.How to Draw :
+  Arbitrary Shapes/Line : mouse down + drag + mouse up
+  Curve : select first control point by clicking on canvas
+          select second point by clicking on canvas
+          select start point by clicking on canvas
+          select end point by clicking on canvas
+  Polygon: click + drag mouse + click to draw first line.
+           To end drawing just double click on canvas.
+  
+  Rectangle/Circle/Pentagon etc ... : select one of those from combobox and 
+  click on canvas and drag mouse.You will see a rectangular area starts appearing.  
+  Mouse up event will fill inside the rectangular area with the shape selected from combobox.
+  If you want to draw filled shapes check the checkbox next to label named "Filled Shape".
+  Then do the same to draw filled shapes.
+
+2.Edit Mode: Press Edit button on Control panel this opens up a rectangular area 
+             Drag this rectangleover the area on which you want to do some transformation.
+             t button : press and old this button and drag your mouse to translate pixels under
+                        rectanglular area
+             r button : click this to rotate shape under rectanglular area
+             su button : scales up the shape under rectanglular area
+             sd button : scales down the shape under rectangular area
+             c button : clears area
+             x button : press tihs to close edit mode.
+
+3.Saving Your Drawing as Image File : Just press Save button and your browser will open up 
+  Save Dialog.File format was set to "png".
+
+  Note: Canvas's background color will not be same in the image you saved.This is because
+        default color of image background is white or gray.If you want red or green backgrounds
+        just paint the canvas with that color.You can draw a filled rectangle with the same size of
+        Canvas.
+
+4.Opening other Image Files : Click Browse button and select the Image file you want to open.
+
+5.You can resize canvas with buttons at the border of canvas.
+
+Note : Project is tested on Mozilla Firefox and all the events are implemented manually .
+       In browser's web console you will see  errors like function name is undefined.
+       This is because I added those event handlers to caller objects in order to fire events
+       on first click/mousedown etc... otherwise most of the events are not fired at the
+       correct time.After all, it works fine!
+
+///////////////////////////////////////////END/////////////////////////////////////////////////
+
+
+  
+
+ 
+
+
+
+ 
+                         

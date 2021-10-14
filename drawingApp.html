@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+
+  #axis_x{
+    border : 2px solid #c5f;
+    background-color :#caf;
+    color : #333;
+    font-size: 8px;
+    display: block;
+    height: 25px;
+    margin-left: 36px;
+    text-orientation: sideways;
+    writing-mode: vertical-lr ;
+    text-align: right;  
+  }
+
+ 
+  #axis_y{
+    border : 2px solid #c5f;
+    background-color :#caf;
+    color : #333;
+    font-size: 8px;
+    text-align: right;
+    width: 25px;
+    float:left;
+    margin-top: 4px;
+    
+  } 
+
+  #indic_x {
+    width: 3px;
+    height:3px;
+    margin-left: 44px;
+    margin-top: -2px;
+    margin-bottom: 3px;
+   display: block;
+  }
+  
+  #indic_y{
+    width: 3px;
+    height: 3px;
+    float:left;
+    
+
+  }
+
+
+    #canvas{
+      
+      background-color:lightgrey;
+       margin-left: 10px;
+       margin-top: 10px; 
+       position: absolute;
+       left:40px;
+       top:40px;  
+       float: left;  
+       
+      }
+      
+
+    .dragbuttons{
+      margin-top: 10px;
+      background-color: #333;  
+      position: absolute;
+      top:40px;
+      float: left;
+    }
+   
+    .controllers{
+      width:300px;
+      margin-left: 10px;
+      margin-right: 10px;
+      margin-top: 10px;
+      border : 1px solid pink;
+      position :absolute;
+      left:850px;
+      top:40px;
+      background-color: gainsboro;
+    }
+
+    
+
+    #statusbar{
+      background-color: #444;
+      margin-left: 10px;
+      width: 300px;
+      color :antiquewhite;
+      display: inline-block;
+      cursor:move;
+      
+    }
+    #infobar{
+      background-color: #444;
+      margin-left: 10px;
+      width: 300px;
+      color :antiquewhite;
+      display: inline-block;
+     
+    }
+    
+    .bars{
+      overflow: hidden;
+      padding : 2px;
+      width : 300px;
+      background-color: limegreen;
+      position: absolute;
+      left: 50px;
+      top:50px;
+      overflow-wrap: normal;
+      
+    }
+
+    
+    
+    #selRegion{
+      border : 2px solid blue ;
+      background-color: rgba(150, 0, 150, 0.2);
+      position : absolute;
+      left: 0px;
+      top : 0px;
+      width: 1px;
+      height: 1px;
+      cursor: move;
+      display: none;
+  }
+
+  .sel_region_btns{
+    background-color:rgba(23, 23, 23, 0.2);
+    margin-top:  -25px;
+    margin-left: -2px;
+  }
+  .sel_region_btns button{
+    background-color :rgba(20, 0, 0, 0.2);
+    color: #caf;
+    border: none;
+  }
+  .sel_region_btns button:hover{
+    background-color: rgba(20, 0, 0, 0.5);
+    color: #caf;
+  }
+
+  .sel_region_btns th{
+      background-color: red;
+      width: 5px;
+      height: 5px;
+      position: relative;
+  }
+
+  .table_toolbox {
+       vertical-align: middle;
+       justify-content: left;
+       padding : 5px;
+       text-align: left;
+  }
+
+  .bars .btn_bars{
+    color:limegreen;
+    background-color:#444;
+    border:2px solid limegreen;
+    margin-left:10px;
+  } 
+
+  .btn_bars:hover{
+    background-color:#555;
+  }
+
+  .eraser{
+    position: absolute;
+    width:5px;
+    height:5px;
+    background-color: blue;
+    display: none ;
+  }
+   
+  .edit_mode_help {
+    display: none;
+    position: absolute;
+    cursor: move;
+  }
+
+  .gridPanel{
+    background-color: rgba(150, 150, 150, 0.1);
+    position: absolute;
+    pointer-events: none;/*grid panel will not be a target for pointer events*/
+  }
+
+</style>
+
+</head>
+
+<body>
+  
+
+  <div id='axis_x'></div>
+  <div id='indic_x'>&uarr;</div>
+  <div id='axis_y'></div>
+  <div id='indic_y'>&larr;</div> 
+
+  <!---Controllers-->  
+  
+      <canvas id="canvas" width = "600" height= "600">
+      </canvas>
+    
+        <div  class="dragbuttons">
+          <button type="button" id="btn" style="width:30px;border-radius: 0px;">&rArr;&lArr;</button><br>
+          <button type="button" id="btn2" style="width:30px;border-radius: 0px;">&uArr;&dArr;</button>
+        </div>
+       
+      <div class="bars">
+        <div>
+          <button type="button" class="btn_bars" onclick="clearInfobar()">
+          Clear</button></div>
+        <div id="statusbar">Cursor:</div>
+        <div id="infobar">Info:</div>
+      </div>
+  
+
+  <img id="img"  src="#" style="display: none;" />
+
+
+<div class = "controllers">
+
+   <table class="table_toolbox">
+   
+     <thead>
+       <tr>
+          <button type="button" onmousedown="dragMe()" >Move Panel</button>
+       </tr>
+     </thead>  
+      <hr>
+     
+     <th colspan="2">Line Properties</th>
+     <tr>
+         <td>Line Width :</td>
+         <td><input type="number" id="lineW" name="lineW" value="5" /></td>
+     </tr>
+
+     <tr>
+         <td>Line Color :</td>
+         <td>
+           <input type="color" id="choose" name="choose" value="black">    
+         </td>     
+    </tr>
+     
+     <tr>
+         <td>Line Cap:</td>
+         <td>
+             <select name = "cap" value="round" id="cap">
+                 <option value="round">round</option>
+                 <option value="butt">butt</option>
+                 <option value="square">square</option>
+             </select>
+         </td>     
+    </tr>
+<hr>
+        <th colspan="2">Canvas Properties</th>
+  
+    <tr>
+        <td>Canvas Color :</td>
+        <td>
+          <input type="color" id="canvaschoose" name="canvaschoose" value="lightgray" oninput="change_canvas_bgcolor()" />    
+        </td> 
+    </tr>
+    <tr>  
+      <td>Width :</td>
+        <td>
+          <input type="number" id="canvas_W" name="canvasW" value="600" onchange="change_canvas_W()" />    
+        </td>
+    </tr>
+    <tr>   
+      <td>Height :</td>
+        <td>
+          <input type="number" id="canvas_H" name="canvasH" value="600" onchange="change_canvas_H()" />    
+        </td>   
+    </tr>
+
+    <tr>
+      <td  colspan="2">
+        Show Grid :
+      <input type="checkbox" id="gridon">
+      </td>
+    </tr>
+         
+   
+      <th colspan="2">Select Shape</th>
+  
+    <tr>
+     <td>Shapes :</td>
+     <td>
+        <select name="sel_shape" id="sel_shape_id"  onchange="change_sel_shape()">
+           <option value="arbitrary" selected>Arbitrary</option>
+           <option value="rectangle">Rectangle</option>
+           <option value="circle">Circle/Ellipse</option>
+           <option value="line">Line</option>
+           <option value="curve">Curve</option>
+           <option value="triangle">Triangle</option>
+           <option value="rightTriangle">Right Triangle</option>
+           <option value="pentagon">Pentagon</option>
+           <option value="hexagon">Hexagon</option>
+           <option value="polygon">Polygon</option>
+        </select>
+
+     </td>
+    </tr>
+    
+    <tr>
+      <td>
+        Filled Shape:
+      </td>
+      <td>
+        <input type="checkbox" id="isFill" name="isFill"  onchange="changeIsFill()"/>
+      </td>
+    </tr>
+
+     
+    
+    <th colspan="2">Edit Mode</th>
+
+    <tr>
+      <td>Actions :</td>
+      <td>
+       <button type="button" id="edit">Edit</button>
+       <button type="button" id="btneraser">Eraser</button>
+       <button type="button" id="help">Help</button>
+      <button type="button" id="clearCanvas" onclick="clearCanvas()">Clear Canvas</button>
+       </td> 
+     
+    
+      </tr>
+     <tr>
+       <td colspan="2">
+       </td> 
+      </tr>
+       
+     
+    
+    <th colspan="2">Save Image</th>
+    <tr>
+    <td>Actions :</td>
+      <td>
+        <a id="download" download="image.png"><button type="button" onClick="download()">Save</button></a>
+     </td>
+    </tr>
+  
+    <th colspan="2">Open Image</th>
+    <tr>
+    <td>Actions :</td>
+       <td>
+        <div style="width: 120px; overflow-x: auto;background-color:limegreen;">
+          <input type="file" id="img_file"/> 
+        </div>
+       </td>
+       <td>
+        <button type="button" id="open_btn" onclick="openFile()">Open</button>
+      </td>
+    </tr>
+     
+   </table> 
+ </div>
+
+
+<!--
+  select region : selects area of pixels to translate and 
+edit them We use ctx.getImageData()/ctx.putImageData() for
+this job
+.-->
+
+  <div id="selRegion">
+
+    <table class="sel_region_btns" >
+      <tr>
+       <td><button type="button" id="t">t</button></td>
+        <td><button type="button" id="r">r</button></td>
+        <td><button type="button" id="su">su</button></td>
+        <td><button type="button" id="sd">sd</button></td>
+        <td><button type="button" id="clr">c</button></td>
+        <td><button type="button" id="close">&times;</button></td>
+      </tr>
+    </table>
+    
+  </div> 
+
+
+
+<div class="eraser" id="eraser"></div> 
+
+<div class=edit_mode_help id="helpmenu">
+  <div style="text-align: right;"><button type="button" id="help_btn" onclick="closeHelp();">&times;</button></div>
+  <p>t: translate selected area</p>
+  <p>r: rotate selected area</p>
+  <p>su: scale up selected area</p>
+  <p>sd: scale down selected area</p>
+  <p>c: clear selected area</p>
+  <p>x: close edit mode</p>
+</div>
+
+<canvas class="gridPanel" id="grid_id">
+</canvas>
+
+<script>
+
+  /** @type HTMLCanvasElement */
+  var c = document.getElementById("canvas") ;
+  var ctx = c.getContext("2d") ;
+  ctx.imageSmoothingEnabled=false;
+  
+   window.onload = function(){
+    
+    updateControls();
+
+    
+    //y axis
+   for(var i = 0 ; i<=window.innerHeight ;i+=10)
+   {
+       document.getElementById("axis_y").innerHTML += 
+       i+ " -<br>" ;
+   }  
+   //x axis
+   for(var i = 0 ; i<=window.innerWidth ;i+=10)
+   {
+       document.getElementById("axis_x").innerHTML += 
+       i+ " -<br>" ;
+   }  
+
+
+
+
+  };
+
+
+  /////////////Grid  Panel///////////////
+  var grid = document.getElementById("grid_id");
+  var gctx = grid.getContext("2d");
+
+  var cb = document.getElementById("gridon");
+  cb.addEventListener("change",showGrid);
+  function showGrid(){
+    if(cb.checked){
+
+      grid.style.display = "block" ; 
+      gridOn();
+    }
+    else
+       grid.style.display = "none" ;
+  }
+
+  
+  function gridOn(){
+   
+  grid.style.left = c.offsetLeft+ "px";
+  grid.style.top = c.offsetTop + "px";
+  grid.setAttribute("width",c.getAttribute("width"));
+  grid.setAttribute("height",c.getAttribute("height"));
+  
+  gctx.lineWidth = 0.5 ;
+  gctx.strokeStyle= "rgba(200,0,0,0.3)"; 
+  //x
+  for(var i = 0 ; i<= grid.height; i+=10){
+    gctx.beginPath();
+    gctx.moveTo(i,0);
+    gctx.lineTo(i,grid.height);
+    gctx.stroke();
+
+  }
+  
+  for(var i = 0 ; i<= grid.width; i+=10){
+        
+    gctx.beginPath();
+    gctx.moveTo(0,i);
+    gctx.lineTo(grid.width,i);
+    gctx.stroke();
+
+  }
+
+
+
+
+  }
+////////////////////////////////
+
+   //Control Variables
+   //line
+   var line_W = 5;
+   var line_Cap  ="round";
+   var sel_Color = "black";
+
+   //canvas
+   var sel_Canvas_Color = "lightgray";
+   var canvas_W = 600;
+   var canvas_H = 600;
+
+   //shapes
+   var sel_shape = document.getElementById("sel_shape_id").value;
+
+   //select Region 
+   var x ,y,w,h; 
+   var sel_region = document.getElementById("selRegion");
+
+   //isFill
+   var isFill= document.getElementById("isFill").value ;
+   
+  var infobar = document.getElementById("infobar"); 
+
+   function clearInfobar(){
+     infobar.innerHTML ="Info:" ;
+   }
+
+   /**copies background of image*/
+function copyImage(){
+     
+    //if you want to store url
+    //var impath = c.toDataURL("image/png");
+    var imdata = new ImageData(20,20);
+    imdata = ctx.getImageData(0,0,c.width,c.height);
+    
+
+    return imdata ;
+}
+
+/**restore background of image*/
+function redrawImage(imgData){
+     ctx.putImageData(imgData , 0,0) ;      
+}
+
+
+   function updateControls(){
+   
+    //line
+    line_W = document.getElementById('lineW').value ; 
+    line_Color = document.getElementById("choose").value ;
+    line_Cap = document.getElementById("cap").value ;
+   
+    //canvas
+    sel_Canvas_Color = document.getElementById("canvaschoose").value ;
+    change_canvas_bgcolor();
+    document.getElementById("canvas_W").value=canvas_W; 
+    document.getElementById("canvas_H").value=canvas_H; 
+    
+    //drag buttons
+    var drg = document.getElementsByClassName("dragbuttons")[0];
+    drg.style.left = c.offsetWidth +50+ "px" ;
+    
+    //fill shape
+    changeIsFill();
+  
+    //grid
+    showGrid();
+  }
+   
+   
+
+   //state variables
+   let painting = false;  
+   
+   //triggered when mouse down on canvas
+   function startPainting(e){
+
+     if(e.button == 0){ //left click OK
+     
+      painting = true;
+      //updateControls() ;   
+      ctx.beginPath();
+      draw(e) ;     
+     }
+    } 
+  
+   //triggered when mouse up on canvas
+   function endPainting(e){
+      painting = false;
+      ctx.beginPath();
+
+     
+         
+   } 
+
+   ////////////fill shape///////////
+   var fill = "false";  //fill shape
+   function changeIsFill(){
+    if(document.getElementById("isFill").checked == true)
+      fill = true;
+    else 
+      fill= false;
+     
+  }
+
+   
+   //drawing
+   //called when mouse down on canvas
+    function draw(e){
+          
+        updateControls();
+
+        if(!painting) return ;
+
+        ctx.lineWidth = line_W ;
+        ctx.strokeStyle = line_Color ;
+        ctx.lineCap = line_Cap ; 
+
+        if(sel_shape =="arbitrary"){
+         
+         c.addEventListener("mousedown",this.drawArbit1(e) ); 
+
+        }
+       
+        if(
+             sel_shape =="rectangle"
+          || sel_shape=="circle"
+          || sel_shape=="triangle"
+          || sel_shape=="rightTriangle"
+          || sel_shape=="pentagon"
+          || sel_shape=="hexagon"
+         
+          ){
+           
+          c.addEventListener("mousedown",this.selRegion1(e) ); 
+          
+          }
+
+
+          if(sel_shape == "line")
+         {
+          c.addEventListener("mousedown",this.drawLine1(e)  );
+
+         }
+         
+          if(sel_shape == "polygon")
+         {
+          c.addEventListener("mousedown",this.drawPoly1(e)  );
+         }
+         
+         if(sel_shape == "curve"){
+
+           c.addEventListener("click" , this.drawCurve1(e));  
+         }
+        
+    } 
+
+
+  ////////////////////draw curve//////////////////
+  var nofclick = 0;
+  var cpx1 = 0;
+  var cpx2 = 0;
+  var cpy1 = 0;
+  var cpy2 = 0;
+  var fx = 0;
+  var fy = 0;
+  var lx = 0;
+  var ly = 0;
+  
+  function drawCurve1(e){
+     
+    
+    //first cp
+    if (nofclick == 0){
+      infobar.innerHTML = "Info : click to select second control point of curve"; 
+            
+       cpx1 = e.offsetX;
+       cpy1 = e.offsetY;
+       ctx.moveTo(e.offsetX,e.offsetY);
+       ctx.lineTo(e.offsetX,e.offsetY);
+        ctx.stroke();
+      }
+    //second cp
+    if(nofclick ==1){
+    
+      infobar.innerHTML = "Info : click to select start point of curve"; 
+
+       cpx2 = e.offsetX;
+       cpy2 = e.offsetY;
+      
+       ctx.moveTo(e.offsetX,e.offsetY);
+       ctx.lineTo(e.offsetX,e.offsetY);
+        ctx.stroke();
+    }  
+    //start point
+     if(nofclick ==2){
+      
+      infobar.innerHTML = "Info : click to select end point of curve"; 
+
+       fx = e.offsetX;
+       fy = e.offsetY;
+      
+       ctx.moveTo(e.offsetX,e.offsetY);
+       ctx.lineTo(e.offsetX,e.offsetY);
+        ctx.stroke();
+     }
+    //end point
+    if(nofclick ==3){
+
+      lx = e.offsetX;
+      ly = e.offsetY;
+     
+      ctx.moveTo(e.offsetX,e.offsetY);
+      ctx.lineTo(e.offsetX,e.offsetY);
+       ctx.stroke();
+      
+      
+      //draw curve
+      ctx.beginPath();
+      ctx.moveTo(fx,fy);
+      ctx.bezierCurveTo(cpx1,cpy1,cpx2,cpy2,lx,ly);
+      ctx.stroke() ;
+      
+      clearInfobar();
+    }
+    if(nofclick <3)
+    nofclick++;
+    else
+    nofclick = 0;
+  }
+
+
+      /////////////////////draw Arbitrary ///////////OK///////////////
+ function drawArbit1(e){
+  if(sel_shape == "arbitrary"){
+ xx = e.offsetX ;
+ yy = e.offsetY;
+ 
+ ctx.beginPath();
+ ctx.moveTo(e.offsetX ,e.offsetY ) ;
+
+  c.addEventListener("mousemove" , drawArbit2  );
+  }
+}
+function drawArbit2(e){
+
+ 
+ ctx.lineTo(e.offsetX , e.offsetY); 
+ ctx.stroke() ;
+ 
+  c.addEventListener("mouseup",drawArbitFinish ) ;
+}
+function drawArbitFinish(e){
+
+ c.removeEventListener("mousemove" , drawArbit2 );
+ c.removeEventListener("mouseup" , drawArbitFinish );
+
+}
+
+
+ //////////////////////////drawing line    OK/////////////////////////////
+   //drawin line
+   var xx,yy;
+   var previmg = new ImageData(20,20);
+   
+   function drawLine1(e){
+     if(sel_shape == "line" ){
+    xx = e.offsetX ;
+    yy = e.offsetY;
+    
+     previmg = copyImage() ; 
+
+    c.addEventListener("mousemove" , drawLine2  );
+     }
+  }
+  function drawLine2(e){
+
+    ctx.clearRect(0,0,c.width , c.height);
+    redrawImage(previmg);
+    ctx.beginPath();
+    ctx.moveTo(xx ,yy ) ;
+    ctx.lineTo(e.offsetX,e.offsetY); 
+    ctx.stroke() ;
+    copyImage();
+
+     c.addEventListener("mouseup",drawLineFinish ) ;
+  }
+  function drawLineFinish(e){
+    
+    c.removeEventListener("mousemove" , drawLine2 );
+    c.removeEventListener("mouseup" , drawLineFinish );
+    
+  }
+
+//////////////////////////drawing Poly OK  /////////////////////////////
+   //drawin poly
+   var xx,yy;
+   
+
+   function drawPoly1(e){
+    if(sel_shape == "polygon"){
+       xx = e.offsetX ;
+       yy = e.offsetY;
+       
+       //store original canvas as image
+       previmg = copyImage();  
+       c.addEventListener("mousemove" , drawPoly2  );
+     }
+   }
+
+  function drawPoly2(e){
+    
+    
+    //clear all  
+    ctx.clearRect(0,0,c.width,c.height) ;
+    //restore orginal canvas
+    redrawImage(previmg);
+    //draw over original canvas
+    ctx.beginPath();
+    ctx.moveTo(xx ,yy ) ;
+    ctx.lineTo(e.offsetX , e.offsetY ); 
+    ctx.stroke() ;
+    //store new canvas
+    copyImage();
+     
+     c.addEventListener("dblclick",drawPolyFinish ) ;
+  }
+  function drawPolyFinish(e){
+     
+    c.removeEventListener("mousemove" , drawPoly2  );
+    //c.removeEventListener("mouseup" , drawPolyFinish );
+
+  }
+ 
+
+
+
+
+ 
+    //shapes
+function change_sel_shape(){
+
+  sel_shape = document.getElementById("sel_shape_id").value ; 
+   
+}
+ 
+
+ //events 
+ c.addEventListener("mousedown",startPainting);
+ c.addEventListener("mouseup",endPainting);
+ c.addEventListener("mousemove",draw);  
+ //c.addEventListener("mousedown",resizeCanvas);  
+ var btn = document.getElementById("btn");
+ btn.addEventListener("mousedown",resizeCanvasW);  
+ var btn2 = document.getElementById("btn2");
+ btn2.style.marginTop = canvas_H+2 -2*btn.offsetHeight+ "px";
+ btn2.addEventListener("mousedown",resizeCanvasH);  
+
+
+    //resize with Draging
+    function resizeCanvasW(e){
+      
+      save_context();
+           btn.addEventListener("mousemove",myfunc);
+           document.addEventListener("mousemove",myfunc)
+           function myfunc(e){
+               
+               canvas_W = e.x-30;
+               c.setAttribute("width",canvas_W);
+               document.getElementById("canvas_W").value = canvas_W;
+               restore_context() ;
+           }
+               
+            
+           document.addEventListener("mouseup",function(){
+              btn.removeEventListener("mousemove",myfunc) ;
+              document.removeEventListener("mousemove",myfunc);
+              
+            });
+          
+              updateControls();
+
+          
+    }
+
+    function resizeCanvasH(e){
+
+        save_context();
+           btn2.addEventListener("mousemove",myfunc);
+           document.addEventListener("mousemove",myfunc)
+           function myfunc(e){
+               
+               canvas_H = e.y;
+              
+               c.setAttribute("height",canvas_H);
+               btn2.style.marginTop = canvas_H+2 -2*btn.offsetHeight+ "px";
+              
+               document.getElementById("canvas_H").value = canvas_H;
+               restore_context() ;
+              }
+           
+            
+           document.addEventListener("mouseup",function(){
+              btn2.removeEventListener("mousemove",myfunc) ;
+              document.removeEventListener("mousemove",myfunc);
+           });
+       
+
+            updateControls() ;
+    }
+
+  
+
+   //event handlers
+   function change_canvas_bgcolor(){
+   
+    document.getElementById("canvas").style.backgroundColor =sel_Canvas_Color;
+  }
+
+   function change_canvas_W(){
+     save_context();
+     
+     canvas_W = document.getElementById("canvas_W").value;
+     
+
+     c.setAttribute("width",canvas_W);
+     document.getElementById("canvas_W").value = canvas_W;
+
+     restore_context() ;
+   }
+
+   function change_canvas_H(){
+    save_context ();
+
+    canvas_H = document.getElementById("canvas_H").value;
+    c.setAttribute("height",canvas_H);
+    btn2.style.marginTop = canvas_H -2*btn2.offsetHeight +2+ "px";
+
+    restore_context ();
+  }
+
+  var dataURL="";
+  var img =  document.getElementById("img"); 
+  
+  //Saving image
+  function save_context(){
+     
+    //save canvas settings
+      ctx.save();
+   //save canvas context
+   //Note : save in png format OR with JPEG you get only blackbackground
+   //instead of canvas's background color!!!
+     dataURL = c.toDataURL("image/png");
+     
+     
+  }
+  
+  function restore_context(){   
+    //restore context   
+    img.src = dataURL ;   
+    //after image is loaded
+    img.onload = function(){
+   
+      
+   //set bg color !!! or u get black/white background
+    //select transparent color otherwise you cannot change previous
+    //bg color.
+    ctx.fillStyle = "transparent";
+
+    ctx.fillRect(0,0,c.offsetWidth,c.offsetHeight); 
+    //draw image over the context
+    ctx.drawImage(img,0,0);//here left-top is (0,0)
+    
+    };
+     //restore canvas settings
+     ctx.restore() ;
+
+}
+
+
+
+ //Event for tracking cursor
+ c.addEventListener("mousemove", trackCursor);
+ 
+ function trackCursor(e){
+  
+   var x = e.offsetX;
+   var y = e.offsetY;
+   
+   var indicx =document.getElementById("indic_x");
+   indicx.style.marginLeft = x + 40 +"px";  
+   
+   var indicy =document.getElementById("indic_y");
+   indicy.style.marginTop = y+2 + "px";  
+  
+   
+   //update status bar
+   var status = document.getElementById("statusbar");
+   status.innerHTML = "Cursor :("+x+","+y+")";
+  
+}  
+
+var controllers;
+//event hand. for toolbox
+function dragMe(e){
+    controllers= document.getElementsByClassName("controllers")[0];
+
+    document.addEventListener("mousemove",dragit);
+     
+}
+ function dragit(e){
+  
+  var x= (e.clientX-40 ) + "px";
+  var y = (e.clientY-40) + "px";
+  controllers.style.left = x; 
+  controllers.style.top = y;
+  
+  if(y < "0px")
+  controllers.style.top = "40px";
+
+  document.addEventListener("mouseup" , stopDrag); 
+};
+function stopDrag(e){
+ document.removeEventListener("mousemove",dragit);
+}
+
+//event hand for statusbar
+var bars = document.getElementsByClassName("bars")[0];
+bars.addEventListener("mousedown",dragStatus);
+function dragStatus(e){
+     document.addEventListener("mousemove",moveStatus);
+}
+function moveStatus(e){
+  var x= (e.x ) - 250+"px";
+  var y = (e.y) + "px";
+  bars.style.left = x; 
+  bars.style.top = y;
+  
+  if(y < "0px")
+  bars.style.top = "40px";
+
+  document.addEventListener("mouseup" , stopStatus);     
+      
+}
+
+function stopStatus(e){
+  document.removeEventListener("mousemove" , moveStatus);  
+}
+
+
+//selected region 
+   var px = 0;
+   var py = 0;
+   //Down
+    function selRegion1(e){
+
+      updateControls();
+    
+      if(   sel_shape=="rectangle" 
+          ||sel_shape=="circle"
+          ||sel_shape=="triangle"
+          ||sel_shape=="rightTriangle"
+          ||sel_shape=="pentagon"
+          ||sel_shape == "hexagon"
+        ){
+        
+          if(e.button == 0){
+
+        sel_region.style.display = "block" ;
+        sel_region.style.left = e.x  + "px"; 
+        sel_region.style.top = e.y +"px"; 
+        sel_region.style.width= "0px";   
+        sel_region.style.height= "0px"; 
+          }
+       
+       
+      }
+    
+      
+      c.addEventListener("mousemove",selRegion2 ) ;  
+      
+        
+        
+    }
+
+    //Move
+    function selRegion2 (e){
+     
+      sel_region.style.visibility = "visible";
+
+        
+       //we added 50 to adjust offset of mouse pointer
+        sel_region.style.width = e.offsetX - sel_region.offsetLeft+50+ "px";
+        sel_region.style.height = e.offsetY  - sel_region.offsetTop+50 + "px";
+        
+       document.addEventListener("mouseup",selRegion3);  
+    }
+
+    //UP
+    //////////////////////Drawing Built in Shapes////////////////////////////////////
+    function selRegion3(e){
+       
+      var w = document.getElementById("lineW").value;
+       
+    
+
+     if(sel_shape == "circle"){      //OK      
+        //draw Circle or ellipse       
+       if(sel_region.style.visibility == "visible"){
+        ctx.beginPath();  
+        ctx.ellipse(
+           sel_region.offsetLeft+sel_region.offsetWidth/2-ctx.canvas.offsetLeft,
+          sel_region.offsetTop + sel_region.offsetHeight/2-ctx.canvas.offsetTop,
+
+                 sel_region.offsetWidth/2-2*ctx.lineWidth ,
+                 sel_region.offsetHeight/2 - 2*ctx.lineWidth,
+                 0,
+                 0,90
+
+        );
+       
+        if(fill != true)
+         ctx.stroke();
+        if(fill == true)
+         {
+           ctx.fillStyle = ctx.strokeStyle ;
+           ctx.fill();
+         } 
+       }
+      }
+        
+     if(sel_shape == "rectangle"){ //OK
+        
+      if(sel_region.style.visibility == "visible"){
+
+      
+         ctx.rect(
+           sel_region.offsetLeft  + ctx.lineWidth -ctx.canvas.offsetLeft  ,
+        sel_region.offsetTop + ctx.lineWidth  -ctx.canvas.offsetTop ,
+        sel_region.offsetWidth  -2*ctx.lineWidth  ,
+        sel_region.offsetHeight -2*ctx.lineWidth 
+        ) ; 
+      
+        if(fill != true)
+        ctx.stroke();
+       if(fill == true)
+        {
+          ctx.fillStyle = ctx.strokeStyle ;
+          ctx.fill();
+        } 
+      }   
+     }
+
+     
+     if(sel_shape =="triangle"){ //OK
+    
+      if(sel_region.style.visibility == "visible"){
+
+      ctx.save();
+        ctx.translate(
+          sel_region.offsetLeft  + ctx.lineWidth -ctx.canvas.offsetLeft  ,
+          sel_region.offsetTop + ctx.lineWidth  -ctx.canvas.offsetTop 
+        );      
+              
+        var w =  (sel_region.offsetWidth -2*ctx.lineWidth);
+        var h =   (sel_region.offsetHeight -2*ctx.lineWidth)
+
+        ctx.beginPath();
+        ctx.moveTo(w/2,0);
+        ctx.lineTo(0 , h);
+        ctx.lineTo(w , h);
+        ctx.closePath() ;
+      
+        if(fill != true)
+         ctx.stroke();
+        if(fill == true)
+         {
+           ctx.fillStyle = ctx.strokeStyle ;
+           ctx.fill();
+         } 
+
+       ctx.restore() ; 
+
+        }
+      }
+     
+      if(sel_shape =="rightTriangle"){  //OK
+    
+        if(sel_region.style.visibility == "visible"){
+
+      ctx.save();
+        ctx.translate(
+          sel_region.offsetLeft  + ctx.lineWidth -ctx.canvas.offsetLeft  ,
+          sel_region.offsetTop + ctx.lineWidth  -ctx.canvas.offsetTop 
+        );      
+              
+        var w =  (sel_region.offsetWidth -4*ctx.lineWidth);
+        var h =   (sel_region.offsetHeight -4*ctx.lineWidth)
+
+        ctx.beginPath();
+        ctx.moveTo(ctx.lineWidth,ctx.lineWidth);
+        ctx.lineTo(ctx.lineWidth , h);
+        ctx.lineTo(w-ctx.lineWidth, h);
+        ctx.closePath() ;
+        
+      
+        if(fill != true)
+        ctx.stroke();
+       if(fill == true)
+        {
+          ctx.fillStyle = ctx.strokeStyle ;
+          ctx.fill();
+        } 
+
+       ctx.restore() ; 
+
+        }
+      }
+
+      if(sel_shape == "pentagon"){
+
+        ctx.save(); 
+         
+        var sx = sel_region.offsetLeft  + ctx.lineWidth -ctx.canvas.offsetLeft ; 
+        var sy = sel_region.offsetTop + ctx.lineWidth  -ctx.canvas.offsetTop  ;
+        
+        ctx.translate(
+          sx,sy
+        );      
+              
+        var w =  (sel_region.offsetWidth -2*ctx.lineWidth);
+        var h =   (sel_region.offsetHeight -2*ctx.lineWidth)
+
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+       
+        var radius = w;
+         for(var i=1;i<=5; ++i){
+       var th = i * 2 * Math.PI/5;
+       var x =   radius * Math.sin(th);
+       var y =   radius - radius * Math.cos(th);
+         ctx.lineTo(x/2,y/2);
+        }
+         
+        if(fill != true)
+         ctx.stroke();
+        if(fill == true)
+         {
+           ctx.fillStyle = ctx.strokeStyle ;
+           ctx.fill();
+         } 
+
+
+
+         ctx.restore() ;
+      }
+
+      //hexagon
+      if(sel_shape == "hexagon"){
+
+        ctx.save(); 
+         
+        var sx = sel_region.offsetLeft  + ctx.lineWidth -ctx.canvas.offsetLeft ; 
+        var sy = sel_region.offsetTop + ctx.lineWidth  -ctx.canvas.offsetTop  ;
+        
+        ctx.translate(
+          sx,sy
+        );      
+              
+        var w =  (sel_region.offsetWidth -4*ctx.lineWidth);
+        var h =   (sel_region.offsetHeight -4*ctx.lineWidth)
+
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+       
+        var radius = w;
+         for(var i=1;i<=6; ++i){
+       var th = i * 2 * Math.PI/6;
+       var x = 0 + radius * Math.sin(th);
+       var y = 0 + radius - radius * Math.cos(th);
+         ctx.lineTo(x/2,y/2);
+        }
+         
+        if(fill != true)
+        ctx.stroke();
+       if(fill == true)
+        {
+          ctx.fillStyle = ctx.strokeStyle ;
+          ctx.fill();
+        } 
+
+         ctx.restore() ;
+      }
+        
+         
+         c.removeEventListener("mousemove",selRegion2) ;
+         document.removeEventListener("mouseup",selRegion3);
+         
+        }
+
+        
+
+
+ //////////////////Event Handler for sel_region , put inside seperate function
+ var isScaling = false;
+ var isTranslating = false;
+ var isMoving = false ;
+ var isResizing = false ;
+ 
+ //1.translate
+ //mousemove over sel_region
+ var trans = document.getElementById("t");
+ trans.addEventListener("mousedown" , f1 );
+
+ var imgData = null ;
+
+//down
+ function f1(e){
+   
+isTranslating = true;
+
+  sel_region.addEventListener("mousemove" , f2 );   
+  sel_region.addEventListener("mouseup" , f3 );  
+
+  //info.innerHTML += "mdown over sel_region,";
+  
+  var prevx = sel_region.offsetLeft; 
+  var prevy =  sel_region.offsetTop;
+   var prevw = sel_region.offsetWidth ;
+  var prevh = sel_region.offsetHeight ;  
+ 
+ 
+
+  imgData= ctx.getImageData(
+    sel_region.offsetLeft-ctx.canvas.offsetLeft,
+    sel_region.offsetTop-ctx.canvas.offsetTop,
+    sel_region.offsetWidth,sel_region.offsetHeight
+
+   );
+  
+   
+
+  ctx.clearRect(
+    sel_region.offsetLeft -ctx.canvas.offsetLeft,
+    sel_region.offsetTop  -ctx.canvas.offsetTop ,
+    sel_region.offsetWidth,sel_region.offsetHeight
+
+  );
+  
+  previmg = copyImage();
+
+ }
+  
+ //move
+ function f2(e){
+    
+  isTranslating = true ;
+
+     
+        //position of sel_region OK
+        //sel_region.style.left = e.x -50 + "px";     
+        //sel_region.style.top = e.y  -50 + "px";     
+        sel_region.style.left = sel_region.offsetLeft + "px";     
+        sel_region.style.top = sel_region.offsetTop + "px";     
+       
+        //transform of image data 
+       ctx.clearRect(0,0,c.width , c.height) ;
+       
+       redrawImage(previmg);
+
+       ctx.putImageData(imgData,
+       sel_region.offsetLeft-ctx.canvas.offsetLeft,
+       sel_region.offsetTop-ctx.canvas.offsetTop,
+        
+       );
+
+       
+       
+       copyImage();
+
+       sel_region.addEventListener("mouseup" , f3 );    
+  }
+  
+
+
+//up
+function f3(e ){
+  
+  sel_region.removeEventListener("mousemove" , f2 ); 
+  sel_region.removeEventListener("mouseup",f3); 
+
+  //info.innerHTML += "mup over sel_region,";    
+  
+
+   ctx.putImageData(imgData,
+  sel_region.offsetLeft-ctx.canvas.offsetLeft,
+  sel_region.offsetTop-ctx.canvas.offsetTop,
+  );  
+ 
+  isTranslating = false ;
+}
+
+//2.Close Edit
+var close = document.getElementById("close");
+close.addEventListener("click",function(){
+    
+  sel_region.style.visibility = "hidden";
+  sel_region.style.left= "100px";   
+  sel_region.style.top= "100px";  
+  
+});
+
+//3.Open Edit Mode
+var edit = document.getElementById("edit");
+edit.addEventListener("click",function(){
+  sel_region.style.display = "block" ;
+  sel_region.style.visibility = "visible";
+  sel_region.style.left= "100px";   
+  sel_region.style.top= "80px";  
+  sel_region.style.width = "100px";
+  sel_region.style.height = "80px";
+});
+
+/////////////////////4.Resize edit rectangle///////////////////
+
+
+sel_region.addEventListener("mousemove",g1);
+
+function g1(e){
+
+  if(isTranslating == false && isScaling==false && isMoving==false){
+
+  //cursors are done we didn't add ne,nw etc...
+  if(
+    (e.x > sel_region.offsetLeft +10)  ||
+    (e.x < sel_region.offsetLeft+sel_region.offsetWidth -10) ||
+    (e.y > sel_region.offsetTop +10)   ||
+    (e.y < sel_region.offsetTop+sel_region.offsetHeight -10) 
+    )
+   sel_region.style.cursor = "move" ;
+
+
+  if( 
+  (e.x > (sel_region.offsetLeft+sel_region.offsetWidth - 10)) &&
+  (e.x < (sel_region.offsetLeft+sel_region.offsetWidth + 10))
+  ){
+       
+    sel_region.style.cursor = "e-resize";
+  }
+
+  
+  if(
+   (e.y > (sel_region.offsetTop+sel_region.offsetHeight - 10)) &&
+   (e.y < (sel_region.offsetTop+sel_region.offsetHeight + 10))
+   ){
+    sel_region.style.cursor = "s-resize";
+  }
+
+sel_region.addEventListener("mousedown",resizeSelRegion1);  
+      
+  }
+}
+
+ 
+
+
+//down
+function resizeSelRegion1 (e){
+     sel_region.removeEventListener("mousemove",g1);
+     document.addEventListener("mousemove",resizeSelRegion2);
+     document.addEventListener("mouseup",resizeSelRegion3);  
+     
+    }
+
+
+var l = sel_region.offsetLeft;
+var t = sel_region.offsetTop ;
+var w = sel_region.offsetWidth;
+var h = sel_region.offsetHeight;
+
+function updateDimensions(){
+     
+   l = sel_region.offsetLeft ;
+   t = sel_region.offsetTop  ;
+   w = sel_region.offsetWidth;
+   h = sel_region.offsetHeight;
+
+
+}
+
+//move
+function resizeSelRegion2(e){
+  
+ 
+
+  //e OK
+  if( 
+    (e.x > (sel_region.offsetLeft+sel_region.offsetWidth -10)) 
+   ){
+    isResizing = true;
+
+
+    let dw =  e.x  - l -c.offsetLeft ;  
+    sel_region.style.width =  dw  + "px";
+
+  }
+    
+  //s
+  if (
+    e.y >( sel_region.offsetTop+sel_region.offsetHeight - 10) 
+      ){
+  
+    isResizing = true;
+   
+    let dh = e.y-t -c.offsetTop;
+    sel_region.style.height = dh + "px";
+  
+  }
+  
+ 
+  if(isResizing ==false ){
+  //move gizmo
+  if(sel_region.style.cursor == "move"){
+   isMoving == true; 
+  
+   
+      sel_region.style.left = e.x - (w/2) +"px";  
+      sel_region.style.top = e.y -h/2 + "px";  
+      updateDimensions() ;
+    }
+  
+   }
+         
+  updateDimensions() ;
+}
+
+//up
+function resizeSelRegion3(e){
+
+  updateDimensions();
+  sel_region.addEventListener("mousemove",g1);
+  document.removeEventListener("mousemove",resizeSelRegion2);
+  document.removeEventListener("mouseup",resizeSelRegion3);
+  
+ 
+
+  
+  isMoving = false;
+  isResizing = false;
+ 
+}
+
+
+///////////////////////////5.Scale Up/Down/////////////////////
+
+ 
+ var lc= 0;   
+ var tc= 0;   
+ var ww= 0;   
+ var hh= 0;   
+
+
+ 
+var su = document.getElementById("su");
+var sd = document.getElementById("sd");
+
+
+//bind events
+//bind event add this to scale button
+su.addEventListener("click",callScaleUp ) ;
+sd.addEventListener("click",callScaleDown  );
+
+var scalex = 1;
+var scaley = 1;
+
+
+function callScaleUp(e){
+  isScaling = true;
+  scale("up") ;
+  isScaling=false;
+}
+function callScaleDown(e){
+  
+  isScaling = true;
+  scale("down") ;
+  isScaling=false;
+}
+
+
+var imgScale = new Image(c.width,c.height);
+
+//function scales selected area
+function scale(updown){
+  
+  lc = sel_region.offsetLeft-c.offsetLeft;
+  tc = sel_region.offsetTop-c.offsetTop;
+  ww= sel_region.offsetWidth;
+  hh= sel_region.offsetHeight;
+
+  
+
+  imgScale.src = c.toDataURL();  
+
+    
+ if(updown == "up"){
+    scalex  = 1.2;
+    scaley  = 1.2;    
+ }
+ if(updown == "down"){
+    scalex = 0.8;
+    scaley = 0.8;
+  
+    /*
+    if(scalex <= 0.2 || scaley <= 0.2){
+     scalex = 0.2;
+     scaley = 0.2;
+    }
+  */
+
+ }
+
+
+//make sure that image is loaded completely !
+//otherwise events are not fired  as expected 
+ imgScale.onload = function(){
+ctx.save();
+ctx.translate(lc,tc);
+
+ctx.clearRect(0,0,ww,hh);
+
+ctx.save();
+
+ctx.scale(scalex, scaley ) ;
+
+
+ctx.drawImage(imgScale , 
+lc,tc,ww,hh,
+ctx.lineWidth ,ctx.lineWidth ,ww,hh
+);
+ctx.drawImage(imgScale , 
+lc,tc,ww,hh,
+ctx.lineWidth ,ctx.lineWidth ,ww,hh
+);
+
+
+
+
+ctx.restore() ;
+ctx.restore();
+};
+
+
+}
+///////////////////////6.clear inside////////////
+var clr = document.getElementById("clr");
+clr.addEventListener("click",clearInside);
+function clearInside(e){
+
+  ctx.clearRect(
+    sel_region.offsetLeft -c.offsetLeft,
+    sel_region.offsetTop -c.offsetTop,
+    sel_region.offsetWidth ,
+    sel_region.offsetHeight
+  );
+}
+
+
+///////////////////////////7.Rotate///////////////////////////OK//
+
+var r = document.getElementById("r");
+
+r.addEventListener("click" , callRotate );
+      
+
+var angle = Math.PI/6 ;
+
+var imgScale = new Image(c.width,c.height); 
+  
+function callRotate(){
+
+lc = sel_region.offsetLeft-c.offsetLeft;
+tc = sel_region.offsetTop-c.offsetTop;
+ww= sel_region.offsetWidth;
+hh= sel_region.offsetHeight;
+
+
+imgScale.src = c.toDataURL(); 
+ctx.clearRect(lc,tc,ww,hh) ;  
+
+imgScale.onload = function(){
+ctx.save();
+ctx.translate(lc,tc);
+
+
+ctx.save();
+ctx.rotate(angle) ;
+
+ctx.drawImage(imgScale , 
+
+lc,tc,ww,hh,
+0,0 ,ww,hh
+);
+
+ctx.restore() ;
+ctx.restore() ; 
+};
+
+
+}
+
+///////////////////////8.Eraser/////////////////////// OK
+var er = document.getElementById("eraser") ;
+var btner = document.getElementById("btneraser") ;
+
+
+  btner.addEventListener("click",function(){
+
+    updateControls() ;
+
+  sel_region.style.display = "none" ;
+  sel_region.style.visibility = "hidden";
+
+  er.style.display = "block";
+  er.style.left = "0px";
+  er.style.top = "0px";
+  er.style.width = line_W +"px";
+  er.style.height = line_W + "px";
+  er.style.border  ="1px solid white" ;
+
+  c.addEventListener("mousemove" , callEraser);
+  er.addEventListener("mousedown",deleteArea); 
+
+  });
+
+function callEraser(e){
+      
+        er.style.left = e.offsetX +c.offsetLeft + "px";
+        er.style.top = e.offsetY + c.offsetTop + "px";
+
+       
+}
+
+
+function deleteArea(e){
+
+    er.addEventListener("mousemove",callEraser3) ;
+    er.addEventListener("dblclick" ,callEraser2);
+    
+    
+  }
+
+  
+  function callEraser3(e){
+
+    ctx.clearRect(er.offsetLeft-c.offsetLeft,
+    er.offsetTop-c.offsetTop,
+    er.offsetWidth,
+    er.offsetHeight) ; 
+
+    er.addEventListener("mouseup" , callEraser2) ;
+   
+  }
+
+
+  function callEraser2(){
+   
+    c.removeEventListener("mousemove" , callEraser);
+    er.removeEventListener("mousedown" ,callEraser2);
+    er.removeEventListener("mousemove" ,callEraser3);
+    er.style.display = "none" ;
+  }
+ 
+//////////////////////Clear Canvas////////////////
+
+function clearCanvas(){
+  ctx.clearRect(0,0,c.width,c.height) ;
+}
+
+/////////////////Save Image//////////////////
+
+function download(){
+  var download = document.getElementById("download"); //link
+  var image = c.toDataURL("image/png");
+              //.replace("image/png", "image/octet-stream");
+  download.setAttribute("href", image);
+
+}
+
+/////////////////Open Image File///////////////////////////
+
+    var imgInput = document.getElementById("img_file");
+    var openBtn = document.getElementById("open_btn");
+    
+    var imgFile = new Image(c.width,c.height);  
+    
+
+    window.addEventListener('load', function() {
+     imgInput.addEventListener('change', function() {
+          
+        if (this.files && this.files[0]) {
+        //  alert(this.files); //returns File List object
+        //  alert(this.files[0]); //returns first file object
+         
+        imgFile = new Image(c.width,c.height);  
+            imgFile.onload = function(){
+                  URL.revokeObjectURL(img.src);  // no longer needed, free memory
+              };
+    
+              imgFile.src = URL.createObjectURL(this.files[0]); // set src to blob url
+              //alert("file: " + imgFile.src) ; //file: blob:http://127.0.0.1:5501/43231f75-447c-4902-b348-36cf2e1c2ff4
+            }
+      });
+    });
+
+    //show image on canvas
+    function openFile(){
+      ctx.drawImage(imgFile,0,0);
+    }
+
+
+    ////////////////edit help/////////////////
+    var help = document.getElementById("help");
+    help.addEventListener("click",showHelp);
+    var divhelp = document.getElementById("helpmenu");
+
+    function showHelp(){
+
+      divhelp.style.display = "block" ;
+      divhelp.style.backgroundColor  = "bisque";
+      divhelp.style.left  = "150px";
+      divhelp.style.top  = "150px";
+      
+    } 
+
+    function closeHelp(){
+      divhelp.style.display = "none" ;
+    }
+
+    divhelp.addEventListener("mousedown",help1);
+    function help1(){
+      document.addEventListener("mousemove",help2);
+    }
+    function help2(e){
+      divhelp.style.left = e.x + "px";
+      divhelp.style.top = e.y + "px";
+      divhelp.addEventListener("mouseup",help3);
+    }
+    function help3(){
+      document.removeEventListener("mousemove",help2);
+    }
+
+
+
+
+
+
+</script>
+
+</body>
+
+</html>
+
+
+
